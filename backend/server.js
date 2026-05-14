@@ -16,6 +16,7 @@ import authRoutes from "./routes/authRoutes.js";
 import couponRoutes from "./routes/couponRoutes.js";
 import deliveryPartnerRoutes from "./routes/deliveryPartnerRoutes.js";
 import foodRoutes from "./routes/foodRoutes.js";
+import helpDeskRoutes from "./routes/helpDeskRoutes.js";
 import notificationRoutes from "./routes/notificationRoutes.js";
 import orderRoutes from "./routes/orderRoutes.js";
 import paymentRoutes from "./routes/paymentRoutes.js";
@@ -23,7 +24,9 @@ import restaurantRoutes from "./routes/restaurantRoutes.js";
 import reviewRoutes from "./routes/reviewRoutes.js";
 import settingsRoutes from "./routes/settingsRoutes.js";
 import userRoutes from "./routes/userRoutes.js";
+import { chatWithHelpDesk, getHelpDeskHistory } from "./controllers/helpDeskController.js";
 import { errorHandler, notFound } from "./middleware/errorMiddleware.js";
+import { protect } from "./middleware/authMiddleware.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -82,6 +85,9 @@ app.get("/", (req, res) => {
 app.use("/api/auth", authRoutes);
 app.use("/api/admin", adminRoutes);
 app.use("/api/foods", foodRoutes);
+app.post("/api/helpdesk/chat", protect, chatWithHelpDesk);
+app.get("/api/helpdesk/history", protect, getHelpDeskHistory);
+app.use("/api/helpdesk", helpDeskRoutes);
 app.use("/api/orders", orderRoutes);
 app.use("/api/restaurants", restaurantRoutes);
 app.use("/api/users", userRoutes);

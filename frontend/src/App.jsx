@@ -23,6 +23,7 @@ import Checkout from "./pages/Checkout";
 import FoodDetails from "./pages/FoodDetails";
 import Foods from "./pages/Foods";
 import ForgotPassword from "./pages/ForgotPassword";
+import HelpDesk from "./pages/HelpDesk";
 import Home from "./pages/Home";
 import Login from "./pages/Login";
 import MyOrders from "./pages/MyOrders";
@@ -86,6 +87,7 @@ const App = () => {
         <Route path="/admin/register" element={<Navigate to="/admin-signup" replace />} />
         <Route path="/admin-signup" element={<AdminSignup />} />
         <Route path="/notifications" element={<ProtectedRoute><Notifications /></ProtectedRoute>} />
+        <Route path="/help-desk" element={<ProtectedRoute><HelpDesk /></ProtectedRoute>} />
         <Route element={<ProtectedRoute />}>
           <Route path="/checkout" element={<Checkout />} />
           <Route path="/my-orders" element={<MyOrders />} />

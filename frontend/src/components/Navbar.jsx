@@ -47,6 +47,11 @@ const Navbar = () => {
         </NavLink>
       )}
       {isAuthenticated && user?.role !== "admin" && (
+        <NavLink to="/help-desk" className={navLinkClass} onClick={() => setOpen(false)}>
+          Help Desk
+        </NavLink>
+      )}
+      {isAuthenticated && user?.role !== "admin" && (
         <NavLink to="/notifications" className={navLinkClass} onClick={() => setOpen(false)}>
           Notifications
         </NavLink>
