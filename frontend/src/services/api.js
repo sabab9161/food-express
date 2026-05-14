@@ -17,7 +17,27 @@ const api = axios.create({
   baseURL: "http://localhost:5000/api"
 });
 
+const publicAuthPaths = [
+  "/auth/send-login-otp",
+  "/auth/verify-login-otp",
+  "/auth/send-signup-otp",
+  "/auth/verify-signup-otp",
+  "/auth/forgot-password",
+  "/auth/reset-password",
+  "/auth/login",
+  "/auth/register",
+  "/auth/admin-register"
+];
+
 api.interceptors.request.use((config) => {
+  const requestUrl = config.url || "";
+  const isPublicAuthRequest = publicAuthPaths.some((path) => requestUrl.includes(path));
+
+  if (isPublicAuthRequest) {
+    delete config.headers.Authorization;
+    return config;
+  }
+
   if (authToken) {
     config.headers.Authorization = `Bearer ${authToken}`;
   }

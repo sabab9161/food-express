@@ -276,8 +276,14 @@ export const sendLoginOtp = async (req, res) => {
     }
 
     const user = await User.findOne({ email: normalizedEmail }).select("+password");
-    if (!user || user.role !== normalizedRole || !(await user.matchPassword(password))) {
+    if (!user || !(await user.matchPassword(password))) {
       return res.status(401).json({ message: "Invalid email or password" });
+    }
+
+    if (user.role !== normalizedRole) {
+      return res.status(403).json({
+        message: user.role === "admin" ? "Please use Admin Login for this account" : "Please use User Login for this account"
+      });
     }
 
     if (user.isBlocked) {

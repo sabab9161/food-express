@@ -14,17 +14,19 @@ export const createOrder = async (req, res) => {
       PayLater: "PayLater"
     };
     const paymentMethod = methodMap[req.body.paymentMethod] || "COD";
-    const paymentStatus = ["UPI", "Card", "PayLater"].includes(paymentMethod) ? "Paid" : "Pending";
+    const paymentStatus = paymentMethod === "COD" ? "Pending" : "Paid";
 
     if (!items?.length) {
       return res.status(400).json({ message: "Cart is empty" });
     }
 
     const sanitizedPaymentDetails = {
+      type: paymentMethod,
       upiApp: "",
       upiId: "",
       cardLast4: "",
-      payLaterProvider: ""
+      payLaterProvider: "",
+      note: paymentMethod === "COD" ? "Cash collection pending" : "Payment completed"
     };
 
     if (paymentMethod === "UPI") {
@@ -85,6 +87,7 @@ export const createOrder = async (req, res) => {
       paymentMethod,
       paymentStatus,
       paymentDetails: sanitizedPaymentDetails,
+      paidAt: paymentStatus === "Paid" ? new Date() : null,
       subtotal,
       deliveryFee,
       total: subtotal + deliveryFee
@@ -97,6 +100,7 @@ export const createOrder = async (req, res) => {
       paymentMethod,
       paymentStatus,
       paymentDetails: sanitizedPaymentDetails,
+      paidAt: paymentStatus === "Paid" ? new Date() : null,
       transactionId: `FE${Date.now()}`
     });
 
@@ -221,20 +225,38 @@ export const updateOrderStatus = async (req, res) => {
       }
     }
 
-    const updates = {
-      status: nextStatus
-    };
+    order.status = nextStatus;
+
+    if (nextStatus === "Delivered" && order.paymentMethod === "COD") {
+      order.paymentStatus = "Paid";
+      order.paymentDetails = {
+        type: "COD",
+        note: "Cash collected"
+      };
+      order.paidAt = new Date();
+      order.markModified("paymentDetails");
+
+      await Payment.updateMany(
+        { order: order._id },
+        {
+          paymentStatus: "Paid",
+          "paymentDetails.type": "COD",
+          "paymentDetails.note": "Cash collected",
+          paidAt: order.paidAt
+        }
+      );
+    }
 
     if (nextStatus === "Refunded") {
-      updates.paymentStatus = "Refunded";
+      order.paymentStatus = "Refunded";
       await Payment.updateMany({ order: order._id }, { paymentStatus: "Refunded" });
     }
 
-    const updatedOrder = await Order.findByIdAndUpdate(
-      req.params.id,
-      updates,
-      { new: true, runValidators: true }
-    ).populate("user", "name email phone").populate("deliveryPartner", "name phone vehicleNumber vehicleType status");
+    await order.save();
+
+    const updatedOrder = await Order.findById(order._id)
+      .populate("user", "name email phone")
+      .populate("deliveryPartner");
 
     if (nextStatus !== currentStatus) {
       await Notification.create({
@@ -256,7 +278,10 @@ export const getAdminStats = async (req, res) => {
   try {
     const [totalOrders, revenueResult] = await Promise.all([
       Order.countDocuments(),
-      Order.aggregate([{ $group: { _id: null, total: { $sum: "$total" } } }])
+      Order.aggregate([
+        { $match: { paymentStatus: "Paid" } },
+        { $group: { _id: null, total: { $sum: "$total" } } }
+      ])
     ]);
 
     res.json({

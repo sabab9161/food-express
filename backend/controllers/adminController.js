@@ -21,7 +21,10 @@ export const getAdminDashboard = async (req, res) => {
       Order.countDocuments(),
       User.countDocuments({ role: "user" }),
       Restaurant.countDocuments(),
-      Order.aggregate([{ $group: { _id: null, total: { $sum: "$total" } } }]),
+      Order.aggregate([
+        { $match: { paymentStatus: "Paid" } },
+        { $group: { _id: null, total: { $sum: "$total" } } }
+      ]),
       Order.countDocuments({ status: "Pending" }),
       Order.countDocuments({ status: "Delivered" }),
       Order.countDocuments({ status: "Cancelled" }),

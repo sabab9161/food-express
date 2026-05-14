@@ -31,28 +31,34 @@ const orderStatusClasses = {
 };
 
 const paymentMethodLabels = {
-  COD: "Cash on Delivery",
+  COD: "COD",
   UPI: "UPI",
   Card: "Card",
   PayLater: "Pay Later"
 };
 
-const getPaymentDetail = (order) => {
+const getOrderStatus = (order) => order.status || order.orderStatus;
+
+const getPaymentDetailText = (order) => {
+  if (order.paymentMethod === "COD" && getOrderStatus(order) === "Delivered") {
+    return "Cash collected";
+  }
+
+  if (order.paymentMethod === "COD" && order.paymentStatus === "Paid") {
+    return "Cash collected";
+  }
+
+  if (order.paymentMethod === "COD") {
+    return "Cash collection pending";
+  }
+
   const details = order.paymentDetails || {};
 
-  if (order.paymentMethod === "UPI") {
-    return [details.upiApp, details.upiId].filter(Boolean).join(" / ") || "UPI";
+  if (typeof details === "string") {
+    return details || "N/A";
   }
 
-  if (order.paymentMethod === "Card") {
-    return details.cardLast4 ? `Card ending ${details.cardLast4}` : "Card";
-  }
-
-  if (order.paymentMethod === "PayLater") {
-    return details.payLaterProvider || "Pay Later";
-  }
-
-  return "COD";
+  return details.note || details.upiApp || details.payLaterProvider || (details.cardLast4 ? `Card ending ${details.cardLast4}` : "N/A");
 };
 
 const StatusTimeline = ({ status }) => {
@@ -87,8 +93,13 @@ const ManageOrders = () => {
   const [partners, setPartners] = useState([]);
   const [selectedPartners, setSelectedPartners] = useState({});
 
-  const loadOrders = () => {
-    api.get("/orders").then(({ data }) => setOrders(data)).catch(() => toast.error("Unable to load orders"));
+  const loadOrders = async () => {
+    try {
+      const { data } = await api.get("/orders");
+      setOrders(data);
+    } catch {
+      toast.error("Unable to load orders");
+    }
   };
 
   useEffect(() => {
@@ -103,7 +114,8 @@ const ManageOrders = () => {
         status: currentOrder.status,
         ...updates
       });
-      setOrders((current) => current.map((order) => (order._id === id ? data : order)));
+      setOrders((current) => current.map((order) => (order._id === data._id ? data : order)));
+      await loadOrders();
       toast.success("Order updated");
     } catch (error) {
       toast.error(error.response?.data?.message || "Update failed");
@@ -155,13 +167,14 @@ const ManageOrders = () => {
 
       <div className="overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm">
         <div className="overflow-x-auto">
-          <table className="w-full min-w-[1320px] text-left text-sm">
+          <table className="w-full min-w-[1420px] text-left text-sm">
             <thead className="bg-slate-100">
               <tr>
                 <th className="p-4">Order ID</th>
                 <th className="p-4">Customer</th>
                 <th className="p-4">Total Amount</th>
-                <th className="p-4">Payment Type</th>
+                <th className="p-4">Payment Method</th>
+                <th className="p-4">Payment Details</th>
                 <th className="p-4">Payment Status</th>
                 <th className="p-4">Delivery Partner</th>
                 <th className="p-4">Assignment Status</th>
@@ -171,8 +184,9 @@ const ManageOrders = () => {
             </thead>
             <tbody className="divide-y divide-slate-100">
               {orders.map((order) => {
-                const options = allowedStatusOptions[order.status] || [];
-                const terminal = ["Delivered", "Cancelled", "Refunded"].includes(order.status);
+                const orderStatus = getOrderStatus(order);
+                const options = allowedStatusOptions[orderStatus] || [];
+                const terminal = ["Delivered", "Cancelled", "Refunded"].includes(orderStatus);
                 const canCancel = options.includes("Cancelled");
                 const assignedPartner = order.deliveryPartner;
 
@@ -187,7 +201,10 @@ const ManageOrders = () => {
                     <td className="p-4 font-black">{formatPrice(order.total)}</td>
                     <td className="p-4">
                       <p className="font-black text-ink">{paymentMethodLabels[order.paymentMethod] || order.paymentMethod || "COD"}</p>
-                      <p className="mt-1 text-xs font-bold text-slate-500">{getPaymentDetail(order)}</p>
+                    </td>
+                    <td className="p-4">
+                      <p className="font-bold text-slate-700">{getPaymentDetailText(order)}</p>
+                      {order.paidAt && <p className="mt-1 text-xs font-bold text-slate-500">Paid at {new Date(order.paidAt).toLocaleString()}</p>}
                     </td>
                     <td className="p-4">
                       <span className={`inline-flex rounded-lg px-3 py-1 text-xs font-black ${paymentStatusClasses[order.paymentStatus] || "bg-slate-100 text-slate-700"}`}>
@@ -237,16 +254,16 @@ const ManageOrders = () => {
                     </td>
                     <td className="p-4">
                       {terminal ? (
-                        <span className={`inline-flex rounded-lg px-3 py-2 text-xs font-black ${orderStatusClasses[order.status] || "bg-slate-100 text-slate-700"}`}>
-                          {order.status}
+                        <span className={`inline-flex rounded-lg px-3 py-2 text-xs font-black ${orderStatusClasses[orderStatus] || "bg-slate-100 text-slate-700"}`}>
+                          {orderStatus}
                         </span>
                       ) : (
-                        <select className="input min-w-52 py-2" value={order.status} onChange={(e) => updateOrder(order._id, { status: e.target.value })}>
-                          <option value={order.status} disabled>{order.status}</option>
+                        <select className="input min-w-52 py-2" value={orderStatus} onChange={(e) => updateOrder(order._id, { status: e.target.value })}>
+                          <option value={orderStatus} disabled>{orderStatus}</option>
                           {options.map((status) => <option key={status} value={status}>{status}</option>)}
                         </select>
                       )}
-                      <StatusTimeline status={order.status} />
+                      <StatusTimeline status={orderStatus} />
                     </td>
                     <td className="p-4">
                       <div className="flex flex-wrap gap-2">

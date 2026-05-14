@@ -59,10 +59,16 @@ const orderSchema = new mongoose.Schema(
       default: "Pending"
     },
     paymentDetails: {
+      type: { type: String, default: "" },
       upiApp: { type: String, default: "" },
       upiId: { type: String, default: "" },
       cardLast4: { type: String, default: "" },
-      payLaterProvider: { type: String, default: "" }
+      payLaterProvider: { type: String, default: "" },
+      note: { type: String, default: "" }
+    },
+    paidAt: {
+      type: Date,
+      default: null
     },
     deliveryPartner: {
       type: mongoose.Schema.Types.ObjectId,
