@@ -11,7 +11,7 @@ import ManageRestaurants from "./admin/ManageRestaurants";
 import ManageUsers from "./admin/ManageUsers";
 import ManageAnalytics from "./admin/ManageAnalytics";
 import ManageNotifications from "./admin/ManageNotifications";
-import ManageReviews from "./admin/ManageReviews";
+import Reviews from "./admin/Reviews";
 import ManageSettings from "./admin/ManageSettings";
 import Coupons from "./admin/Coupons";
 import DeliveryPartners from "./admin/DeliveryPartners";
@@ -63,7 +63,7 @@ const App = () => {
           <Route path="orders" element={<ManageOrders />} />
           <Route path="users" element={<ManageUsers />} />
           <Route path="analytics" element={<ManageAnalytics />} />
-          <Route path="reviews" element={<ManageReviews />} />
+          <Route path="reviews" element={<Reviews />} />
           <Route path="notifications" element={<ManageNotifications />} />
           <Route path="settings" element={<ManageSettings />} />
         </Route>

@@ -1,4 +1,4 @@
-import { Edit3, Plus, Trash2, X } from "lucide-react";
+import { Edit3, Plus, Star, Trash2, X } from "lucide-react";
 import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
 import api from "../services/api";
@@ -19,7 +19,21 @@ const DeliveryPartners = () => {
     setError("");
     try {
       const { data } = await api.get("/delivery-partners");
-      setPartners(data);
+      const partnersWithRatings = await Promise.all(
+        data.map(async (partner) => {
+          try {
+            const { data: ratingData } = await api.get(`/reviews/delivery-partner/${partner._id}`);
+            return {
+              ...partner,
+              averageRating: ratingData.averageRating || 0,
+              totalReviews: ratingData.totalReviews || 0
+            };
+          } catch {
+            return { ...partner, averageRating: 0, totalReviews: 0 };
+          }
+        })
+      );
+      setPartners(partnersWithRatings);
     } catch (loadError) {
       const message = loadError.response?.data?.message || "Unable to load delivery partners";
       setError(message);
@@ -118,10 +132,10 @@ const DeliveryPartners = () => {
         <div className="overflow-x-auto">
           <table className="w-full min-w-[1000px] text-left text-sm">
             <thead className="bg-slate-100">
-              <tr><th className="p-4">Name</th><th className="p-4">Phone</th><th className="p-4">Email</th><th className="p-4">Vehicle Type</th><th className="p-4">Vehicle Number</th><th className="p-4">Status</th><th className="p-4">Earnings</th><th className="p-4">Action</th></tr>
+              <tr><th className="p-4">Name</th><th className="p-4">Phone</th><th className="p-4">Email</th><th className="p-4">Vehicle Type</th><th className="p-4">Vehicle Number</th><th className="p-4">Status</th><th className="p-4">Rating</th><th className="p-4">Earnings</th><th className="p-4">Action</th></tr>
             </thead>
             <tbody className="divide-y divide-slate-100">
-              {loading && <tr><td className="p-6 text-center font-bold text-slate-500" colSpan={8}>Loading delivery partners...</td></tr>}
+              {loading && <tr><td className="p-6 text-center font-bold text-slate-500" colSpan={9}>Loading delivery partners...</td></tr>}
               {!loading && partners.map((partner) => (
                 <tr key={partner._id}>
                   <td className="p-4 font-bold">{partner.name}</td>
@@ -130,6 +144,13 @@ const DeliveryPartners = () => {
                   <td className="p-4">{partner.vehicleType}</td>
                   <td className="p-4">{partner.vehicleNumber}</td>
                   <td className="p-4">{partner.status}</td>
+                  <td className="p-4">
+                    <div className="inline-flex items-center gap-1 rounded-full bg-amber-50 px-3 py-1 font-black text-amber-700">
+                      <Star size={16} className="fill-amber-400 text-amber-400" />
+                      {partner.averageRating || 0}
+                    </div>
+                    <p className="mt-1 text-xs font-bold text-slate-500">{partner.totalReviews || 0} reviews</p>
+                  </td>
                   <td className="p-4 font-black">{formatPrice(partner.earnings)}</td>
                   <td className="p-4">
                     <div className="flex flex-wrap gap-2">
@@ -140,7 +161,7 @@ const DeliveryPartners = () => {
                   </td>
                 </tr>
               ))}
-              {!loading && !partners.length && <tr><td className="p-6 text-center font-bold text-slate-500" colSpan={8}>No records found</td></tr>}
+              {!loading && !partners.length && <tr><td className="p-6 text-center font-bold text-slate-500" colSpan={9}>No records found</td></tr>}
             </tbody>
           </table>
         </div>

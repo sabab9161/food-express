@@ -176,8 +176,8 @@ const seedFoods = async () => {
 
     const firstFood = await Food.findOne();
     await Review.insertMany([
-      { customerName: "Neha Kapoor", rating: 5, comment: "Food arrived hot and fresh.", food: firstFood?._id },
-      { customerName: "Rohan Mehta", rating: 4, comment: "Good packaging and quick delivery.", restaurant: createdRestaurants[0]._id }
+      { customerName: "Neha Kapoor", reviewType: "food", rating: 5, comment: "Food arrived hot and fresh.", food: firstFood?._id },
+      { customerName: "Rohan Mehta", reviewType: "restaurant", rating: 4, comment: "Good packaging and quick delivery.", restaurant: createdRestaurants[0]._id }
     ]);
 
     await Settings.create({
