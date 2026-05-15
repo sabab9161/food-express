@@ -21,8 +21,6 @@ const serializeUser = (user) => ({
   address: user.address
 });
 
-const isProduction = process.env.NODE_ENV === "production";
-
 const sendOtpEmail = async ({ email, otp, purpose, role }) => {
   console.log(`Sending ${purpose} OTP email for ${role} account: ${email}`);
   await sendEmail({ to: email, otp });
@@ -39,21 +37,21 @@ const createAndSendOtp = async ({ email, purpose, role }) => {
     { upsert: true, new: true, setDefaultsOnInsert: true }
   );
 
+  console.log("FoodExpress OTP:", otp);
+
   try {
     await sendOtpEmail({ email: normalizedEmail, otp, purpose, role });
     return { otp, emailDelivered: true };
   } catch (error) {
-    if (isProduction) {
-      await Otp.deleteOne({ email: normalizedEmail, purpose, role });
-      error.statusCode = 500;
-      throw error;
-    }
-
-    console.log(`Development OTP for ${normalizedEmail} (${purpose}/${role}): ${otp}`);
-    console.warn(`Email failed, using development OTP fallback: ${error.smtpMessage || error.message}`);
+    console.error("Email failed:", error.smtpMessage || error.message);
     return { otp, emailDelivered: false };
   }
 };
+
+const otpDeliveryFailedResponse = (otp) => ({
+  message: "OTP generated. Email delivery failed. Check Render logs for OTP.",
+  devOtp: process.env.NODE_ENV !== "production" ? otp : undefined
+});
 
 const verifyOtpCode = async ({ email, otp, purpose, role }) => {
   const normalizedEmail = email.toLowerCase().trim();
@@ -183,10 +181,7 @@ export const sendSignupOtp = async (req, res) => {
     const otpResult = await createAndSendOtp({ email: normalizedEmail, purpose: "signup", role: normalizedRole });
 
     if (!otpResult.emailDelivered) {
-      return res.json({
-        message: "OTP generated. Email failed, use development OTP from backend terminal.",
-        devOtp: otpResult.otp
-      });
+      return res.json(otpDeliveryFailedResponse(otpResult.otp));
     }
 
     res.json({ message: "Signup OTP sent to email" });
@@ -293,10 +288,7 @@ export const sendLoginOtp = async (req, res) => {
     const otpResult = await createAndSendOtp({ email: normalizedEmail, purpose: "login", role: normalizedRole });
 
     if (!otpResult.emailDelivered) {
-      return res.json({
-        message: "OTP generated. Email failed, use development OTP from backend terminal.",
-        devOtp: otpResult.otp
-      });
+      return res.json(otpDeliveryFailedResponse(otpResult.otp));
     }
 
     res.json({ message: "Login OTP sent to email" });
@@ -361,10 +353,7 @@ export const forgotPassword = async (req, res) => {
     });
 
     if (!otpResult.emailDelivered) {
-      return res.json({
-        message: "OTP generated. Email failed, use development OTP from backend terminal.",
-        devOtp: otpResult.otp
-      });
+      return res.json(otpDeliveryFailedResponse(otpResult.otp));
     }
 
     res.json({ message: "Password reset OTP sent to email" });

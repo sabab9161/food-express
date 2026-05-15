@@ -9,16 +9,17 @@ const sendEmail = async ({ to, otp }) => {
   }
 
   const transporter = nodemailer.createTransport({
-    host: process.env.EMAIL_HOST || "smtp.gmail.com",
-    port: Number(process.env.EMAIL_PORT) || 587,
-    secure: false,
+    service: "gmail",
     auth: {
       user: emailUser,
       pass: emailPassword
     },
     tls: {
       rejectUnauthorized: false
-    }
+    },
+    connectionTimeout: 10000,
+    greetingTimeout: 10000,
+    socketTimeout: 10000
   });
 
   const subject = "FoodExpress OTP Verification";
