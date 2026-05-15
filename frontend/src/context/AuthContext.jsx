@@ -46,7 +46,6 @@ export const AuthProvider = ({ children }) => {
   const sendSignupOtp = async (payload, role = "user") => {
     try {
       const { data } = await api.post("/auth/send-signup-otp", { ...payload, role });
-      toast.success(data.message || "OTP sent to email");
       return data;
     } catch (error) {
       error.message = getErrorMessage(error);
@@ -57,7 +56,6 @@ export const AuthProvider = ({ children }) => {
   const sendLoginOtp = async (payload, role = "user") => {
     try {
       const { data } = await api.post("/auth/send-login-otp", { ...payload, role });
-      toast.success(data.message || "OTP sent to email");
       return data;
     } catch (error) {
       error.message = getErrorMessage(error);

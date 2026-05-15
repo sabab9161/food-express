@@ -5,31 +5,52 @@ import { Link, useNavigate } from "react-router-dom";
 import OtpVerification from "../components/OtpVerification";
 import { useAuth } from "../context/AuthContext";
 
+const otpSuccessMessage = (data, fallback = "OTP sent to email") =>
+  data?.message?.includes("Email delivery failed")
+    ? "OTP generated. If email does not arrive, check Render logs for development OTP."
+    : data?.message || fallback;
+
 const AdminLogin = () => {
   const [form, setForm] = useState({ email: "", password: "" });
   const [otp, setOtp] = useState("");
   const [step, setStep] = useState("form");
-  const [loading, setLoading] = useState(false);
+  const [sendingOtp, setSendingOtp] = useState(false);
+  const [verifyingOtp, setVerifyingOtp] = useState(false);
   const { sendLoginOtp, login } = useAuth();
   const navigate = useNavigate();
 
   const sendOtp = async (event) => {
     event?.preventDefault();
-    if (loading) return;
-    setLoading(true);
+    if (sendingOtp) return;
+    setSendingOtp(true);
     try {
-      await sendLoginOtp(form, "admin");
+      const data = await sendLoginOtp(form, "admin");
+      toast.success(otpSuccessMessage(data, "Admin login OTP sent to email"));
       setStep("otp");
     } catch (error) {
       toast.error(error.response?.data?.message || error.message || "Something went wrong");
     } finally {
-      setLoading(false);
+      setSendingOtp(false);
+    }
+  };
+
+  const handleResendOtp = async () => {
+    if (sendingOtp) return;
+    setSendingOtp(true);
+    try {
+      const data = await sendLoginOtp(form, "admin");
+      toast.success(data?.message?.includes("Email delivery failed") ? otpSuccessMessage(data) : "OTP resent successfully");
+    } catch (error) {
+      toast.error(error.response?.data?.message || error.message || "Something went wrong");
+    } finally {
+      setSendingOtp(false);
     }
   };
 
   const verifyOtp = async (event) => {
     event.preventDefault();
-    setLoading(true);
+    if (verifyingOtp) return;
+    setVerifyingOtp(true);
     try {
       const user = await login({ email: form.email, otp, role: "admin" });
       if (user.role !== "admin") {
@@ -40,7 +61,7 @@ const AdminLogin = () => {
     } catch (error) {
       toast.error(error.response?.data?.message || error.message || "Something went wrong");
     } finally {
-      setLoading(false);
+      setVerifyingOtp(false);
     }
   };
 
@@ -53,9 +74,10 @@ const AdminLogin = () => {
             otp={otp}
             setOtp={setOtp}
             onVerify={verifyOtp}
-            onResend={sendOtp}
+            onResend={handleResendOtp}
             onBack={() => setStep("form")}
-            loading={loading}
+            sendingOtp={sendingOtp}
+            verifyingOtp={verifyingOtp}
             title="Verify admin login"
             description="Enter the admin login code sent to your email."
           />
@@ -83,8 +105,8 @@ const AdminLogin = () => {
               Forgot password?
             </Link>
           </div>
-          <button className="btn-primary w-full" disabled={loading}>
-            {loading ? "Sending OTP..." : "Send Admin Login OTP"}
+          <button type="submit" className="btn-primary w-full" disabled={sendingOtp}>
+            {sendingOtp ? "Sending OTP..." : "Send Admin Login OTP"}
           </button>
         </div>
 

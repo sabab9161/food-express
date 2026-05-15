@@ -6,19 +6,24 @@ import PasswordField from "../components/PasswordField";
 import api from "../services/api";
 import { getPasswordStatus, passwordErrorMessage } from "../utils/passwordValidation";
 
+const otpSuccessMessage = (data, fallback = "Password reset OTP sent to email") =>
+  data?.message?.includes("Email delivery failed")
+    ? "OTP generated. If email does not arrive, check Render logs for development OTP."
+    : data?.message || fallback;
+
 const ResetPassword = ({ role = "user" }) => {
   const location = useLocation();
   const navigate = useNavigate();
   const isAdmin = role === "admin";
   const loginPath = isAdmin ? "/admin-login" : "/login";
-  const forgotPath = isAdmin ? "/admin/forgot-password" : "/forgot-password";
   const [form, setForm] = useState({
     email: location.state?.email || "",
     otp: "",
     newPassword: "",
     confirmPassword: ""
   });
-  const [loading, setLoading] = useState(false);
+  const [sendingOtp, setSendingOtp] = useState(false);
+  const [verifyingOtp, setVerifyingOtp] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const passwordStatus = getPasswordStatus(form.newPassword);
   const isFormInvalid =
@@ -44,7 +49,9 @@ const ResetPassword = ({ role = "user" }) => {
       return;
     }
 
-    setLoading(true);
+    if (verifyingOtp) return;
+
+    setVerifyingOtp(true);
     try {
       const { data } = await api.post("/auth/reset-password", {
         email: form.email.trim(),
@@ -58,7 +65,31 @@ const ResetPassword = ({ role = "user" }) => {
     } catch (error) {
       toast.error(error.response?.data?.message || error.message || "Something went wrong");
     } finally {
-      setLoading(false);
+      setVerifyingOtp(false);
+    }
+  };
+
+  const handleResendOtp = async () => {
+    const normalizedEmail = form.email.trim();
+
+    if (!normalizedEmail) {
+      toast.error("Email is required");
+      return;
+    }
+
+    if (sendingOtp) return;
+
+    setSendingOtp(true);
+    try {
+      const { data } = await api.post("/auth/forgot-password", {
+        email: normalizedEmail,
+        role
+      });
+      toast.success(data?.message?.includes("Email delivery failed") ? otpSuccessMessage(data) : "OTP resent successfully");
+    } catch (error) {
+      toast.error(error.response?.data?.message || error.message || "Something went wrong");
+    } finally {
+      setSendingOtp(false);
     }
   };
 
@@ -136,14 +167,14 @@ const ResetPassword = ({ role = "user" }) => {
           </label>
         </div>
 
-        <button className="btn-primary mt-6 w-full" disabled={loading || isFormInvalid}>
-          {loading ? "Resetting..." : "Reset Password"}
+        <button type="submit" className="btn-primary mt-6 w-full" disabled={verifyingOtp || isFormInvalid}>
+          {verifyingOtp ? "Resetting..." : "Reset Password"}
         </button>
 
         <div className="mt-5 flex flex-wrap items-center justify-between gap-3 text-sm">
-          <Link className="font-bold text-brand-600" to={forgotPath}>
-            Send OTP again
-          </Link>
+          <button type="button" className="font-bold text-brand-600" onClick={handleResendOtp} disabled={sendingOtp}>
+            {sendingOtp ? "Resending..." : "Resend OTP"}
+          </button>
           <Link className="font-bold text-brand-600" to={loginPath}>
             Back to login
           </Link>

@@ -4,9 +4,14 @@ import toast from "react-hot-toast";
 import { Link, useNavigate } from "react-router-dom";
 import api from "../services/api";
 
+const otpSuccessMessage = (data, fallback = "Password reset OTP sent to email") =>
+  data?.message?.includes("Email delivery failed")
+    ? "OTP generated. If email does not arrive, check Render logs for development OTP."
+    : data?.message || fallback;
+
 const ForgotPassword = ({ role = "user" }) => {
   const [email, setEmail] = useState("");
-  const [loading, setLoading] = useState(false);
+  const [sendingOtp, setSendingOtp] = useState(false);
   const navigate = useNavigate();
   const isAdmin = role === "admin";
   const loginPath = isAdmin ? "/admin-login" : "/login";
@@ -21,18 +26,20 @@ const ForgotPassword = ({ role = "user" }) => {
       return;
     }
 
-    setLoading(true);
+    if (sendingOtp) return;
+
+    setSendingOtp(true);
     try {
       const { data } = await api.post("/auth/forgot-password", {
         email: normalizedEmail,
         role
       });
-      toast.success(data.message || "Password reset OTP sent to email");
+      toast.success(otpSuccessMessage(data));
       navigate(resetPath, { state: { email: normalizedEmail, role } });
     } catch (error) {
       toast.error(error.response?.data?.message || error.message || "Something went wrong");
     } finally {
-      setLoading(false);
+      setSendingOtp(false);
     }
   };
 
@@ -63,8 +70,8 @@ const ForgotPassword = ({ role = "user" }) => {
           />
         </label>
 
-        <button className="btn-primary mt-5 w-full" disabled={loading || !email.trim()}>
-          {loading ? "Sending OTP..." : "Send Reset OTP"}
+        <button type="submit" className="btn-primary mt-5 w-full" disabled={sendingOtp || !email.trim()}>
+          {sendingOtp ? "Sending OTP..." : "Send Reset OTP"}
         </button>
 
         <p className="mt-5 text-center text-sm text-slate-600">

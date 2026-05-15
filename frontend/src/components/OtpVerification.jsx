@@ -8,6 +8,8 @@ const OtpVerification = ({
   onResend,
   onBack,
   loading,
+  sendingOtp = loading,
+  verifyingOtp = loading,
   title = "Verify email OTP",
   description = "Enter the 6 digit code sent to your email."
 }) => {
@@ -36,8 +38,8 @@ const OtpVerification = ({
           onChange={(event) => handleChange(event.target.value)}
           required
         />
-        <button className="btn-primary mt-5 w-full" disabled={loading || otp.length !== 6}>
-          {loading ? "Verifying..." : "Verify OTP"}
+        <button type="submit" className="btn-primary mt-5 w-full" disabled={verifyingOtp || otp.length !== 6}>
+          {verifyingOtp ? "Verifying..." : "Verify OTP"}
         </button>
       </form>
 
@@ -45,8 +47,8 @@ const OtpVerification = ({
         <button type="button" className="font-bold text-slate-600 hover:text-ink" onClick={onBack}>
           Change details
         </button>
-        <button type="button" className="inline-flex items-center gap-2 font-bold text-brand-600" onClick={onResend} disabled={loading}>
-          <RefreshCw size={16} /> Resend OTP
+        <button type="button" className="inline-flex items-center gap-2 font-bold text-brand-600" onClick={onResend} disabled={sendingOtp}>
+          <RefreshCw size={16} /> {sendingOtp ? "Resending..." : "Resend OTP"}
         </button>
       </div>
     </div>

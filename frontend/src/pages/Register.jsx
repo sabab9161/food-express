@@ -9,12 +9,17 @@ import { getPasswordStatus, passwordErrorMessage } from "../utils/passwordValida
 
 const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const phonePattern = /^[6-9]\d{9}$/;
+const otpSuccessMessage = (data, fallback = "OTP sent to email") =>
+  data?.message?.includes("Email delivery failed")
+    ? "OTP generated. If email does not arrive, check Render logs for development OTP."
+    : data?.message || fallback;
 
 const Register = () => {
   const [form, setForm] = useState({ name: "", email: "", password: "", confirmPassword: "", phone: "", address: "" });
   const [otp, setOtp] = useState("");
   const [step, setStep] = useState("form");
-  const [loading, setLoading] = useState(false);
+  const [sendingOtp, setSendingOtp] = useState(false);
+  const [verifyingOtp, setVerifyingOtp] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const { sendSignupOtp, register } = useAuth();
   const navigate = useNavigate();
@@ -31,7 +36,7 @@ const Register = () => {
 
   const sendOtp = async (event) => {
     event?.preventDefault();
-    if (loading) return;
+    if (sendingOtp) return;
 
     if (!isEmailValid) {
       toast.error("Enter a valid email address");
@@ -53,20 +58,35 @@ const Register = () => {
       return;
     }
 
-    setLoading(true);
+    setSendingOtp(true);
     try {
-      await sendSignupOtp({ ...form, email: form.email.trim(), phone: form.phone.trim() }, "user");
+      const data = await sendSignupOtp({ ...form, email: form.email.trim(), phone: form.phone.trim() }, "user");
+      toast.success(otpSuccessMessage(data, "Signup OTP sent to email"));
       setStep("otp");
     } catch (error) {
       toast.error(error.response?.data?.message || error.message || "Something went wrong");
     } finally {
-      setLoading(false);
+      setSendingOtp(false);
+    }
+  };
+
+  const handleResendOtp = async () => {
+    if (sendingOtp) return;
+    setSendingOtp(true);
+    try {
+      const data = await sendSignupOtp({ ...form, email: form.email.trim(), phone: form.phone.trim() }, "user");
+      toast.success(data?.message?.includes("Email delivery failed") ? otpSuccessMessage(data) : "OTP resent successfully");
+    } catch (error) {
+      toast.error(error.response?.data?.message || error.message || "Something went wrong");
+    } finally {
+      setSendingOtp(false);
     }
   };
 
   const verifyOtp = async (event) => {
     event.preventDefault();
-    setLoading(true);
+    if (verifyingOtp) return;
+    setVerifyingOtp(true);
     try {
       await register({ ...form, email: form.email.trim(), phone: form.phone.trim(), otp });
       toast.success("Account verified. Please log in.");
@@ -74,7 +94,7 @@ const Register = () => {
     } catch (error) {
       toast.error(error.response?.data?.message || error.message || "Something went wrong");
     } finally {
-      setLoading(false);
+      setVerifyingOtp(false);
     }
   };
 
@@ -87,9 +107,10 @@ const Register = () => {
             otp={otp}
             setOtp={setOtp}
             onVerify={verifyOtp}
-            onResend={sendOtp}
+            onResend={handleResendOtp}
             onBack={() => setStep("form")}
-            loading={loading}
+            sendingOtp={sendingOtp}
+            verifyingOtp={verifyingOtp}
             title="Verify customer signup"
             description="Enter the code sent to your email to create your FoodExpress account."
           />
@@ -150,8 +171,8 @@ const Register = () => {
           </label>
           <input className="input" placeholder="Delivery Address" value={form.address} onChange={(e) => setForm({ ...form, address: e.target.value })} required />
         </div>
-        <button className="btn-primary mt-5 w-full" disabled={loading || isFormInvalid}>
-          {loading ? "Sending OTP..." : "Send Signup OTP"}
+        <button type="submit" className="btn-primary mt-5 w-full" disabled={sendingOtp || isFormInvalid}>
+          {sendingOtp ? "Sending OTP..." : "Send Signup OTP"}
         </button>
         <p className="mt-5 text-center text-sm text-slate-600">
           Already registered?{" "}
