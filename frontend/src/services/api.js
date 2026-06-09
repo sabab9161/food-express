@@ -22,10 +22,6 @@ const api = axios.create({
 });
 
 const publicAuthPaths = [
-  "/auth/send-login-otp",
-  "/auth/verify-login-otp",
-  "/auth/send-signup-otp",
-  "/auth/verify-signup-otp",
   "/auth/forgot-password",
   "/auth/reset-password",
   "/auth/login",

@@ -21,9 +21,9 @@ const welcomeMessage = {
 
 const TypingDots = () => (
   <div className="flex items-center gap-1 px-1 py-2">
-    <span className="h-2 w-2 animate-bounce rounded-full bg-slate-400 [animation-delay:-0.2s]" />
-    <span className="h-2 w-2 animate-bounce rounded-full bg-slate-400 [animation-delay:-0.1s]" />
-    <span className="h-2 w-2 animate-bounce rounded-full bg-slate-400" />
+    <span className="typing-dot h-2 w-2 rounded-full bg-slate-400 [animation-delay:-0.2s]" />
+    <span className="typing-dot h-2 w-2 rounded-full bg-slate-400 [animation-delay:-0.1s]" />
+    <span className="typing-dot h-2 w-2 rounded-full bg-slate-400" />
   </div>
 );
 

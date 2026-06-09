@@ -9,12 +9,16 @@ export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [token, setToken] = useState(null);
 
+  const setSession = ({ token: nextToken, user: nextUser }) => {
+    setToken(nextToken);
+    setApiAuthToken(nextToken);
+    setUser(nextUser);
+  };
+
   const login = async (credentials) => {
     try {
-      const { data } = await api.post("/auth/verify-login-otp", credentials);
-      setToken(data.token);
-      setApiAuthToken(data.token);
-      setUser(data.user);
+      const { data } = await api.post("/auth/login", credentials);
+      setSession(data);
       toast.success(`Welcome back, ${data.user.name}`);
       return data.user;
     } catch (error) {
@@ -25,7 +29,9 @@ export const AuthProvider = ({ children }) => {
 
   const register = async (payload) => {
     try {
-      const { data } = await api.post("/auth/verify-signup-otp", { ...payload, role: "user" });
+      const { data } = await api.post("/auth/register", payload);
+      setSession(data);
+      toast.success(`Welcome, ${data.user.name}`);
       return data.user;
     } catch (error) {
       error.message = getErrorMessage(error);
@@ -35,28 +41,10 @@ export const AuthProvider = ({ children }) => {
 
   const registerAdmin = async (payload) => {
     try {
-      const { data } = await api.post("/auth/verify-signup-otp", { ...payload, role: "admin" });
+      const { data } = await api.post("/auth/admin-register", payload);
+      setSession(data);
+      toast.success(`Welcome, ${data.user.name}`);
       return data.user;
-    } catch (error) {
-      error.message = getErrorMessage(error);
-      throw error;
-    }
-  };
-
-  const sendSignupOtp = async (payload, role = "user") => {
-    try {
-      const { data } = await api.post("/auth/send-signup-otp", { ...payload, role });
-      return data;
-    } catch (error) {
-      error.message = getErrorMessage(error);
-      throw error;
-    }
-  };
-
-  const sendLoginOtp = async (payload, role = "user") => {
-    try {
-      const { data } = await api.post("/auth/send-login-otp", { ...payload, role });
-      return data;
     } catch (error) {
       error.message = getErrorMessage(error);
       throw error;
@@ -82,8 +70,7 @@ export const AuthProvider = ({ children }) => {
       login,
       register,
       registerAdmin,
-      sendSignupOtp,
-      sendLoginOtp,
+      setSession,
       logout,
       updateUser
     }),

@@ -104,7 +104,7 @@ const Reviews = () => {
                         />
                         <div className="flex gap-2">
                           <button className="btn-primary py-2" onClick={() => saveReply(review._id)}>Reply</button>
-                          <button className="rounded-lg border border-red-200 px-4 py-2 font-bold text-red-600" onClick={() => remove(review._id)}><Trash2 size={17} /></button>
+                          <button className="rounded-lg border border-red-200 px-4 py-2 font-bold text-red-600" onClick={() => remove(review._id)} aria-label="Delete review" title="Delete review"><Trash2 size={17} /></button>
                         </div>
                       </div>
                     </td>

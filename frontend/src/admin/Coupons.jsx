@@ -240,8 +240,8 @@ const Coupons = () => {
                   <td className="p-4">
                     <div className="flex flex-wrap gap-2">
                       <button className="rounded-lg border border-amber-200 px-3 py-2 text-xs font-black text-amber-700" onClick={() => updateCoupon(coupon, { isActive: !coupon.isActive })}>{coupon.isActive ? "Deactivate" : "Activate"}</button>
-                      <button className="rounded-lg border border-slate-200 p-2" onClick={() => editCoupon(coupon)}><Edit3 size={17} /></button>
-                      <button className="rounded-lg border border-red-200 p-2 text-red-600" onClick={() => deleteCoupon(coupon)}><Trash2 size={17} /></button>
+                      <button className="rounded-lg border border-slate-200 p-2" onClick={() => editCoupon(coupon)} aria-label={`Edit coupon ${coupon.code}`} title={`Edit coupon ${coupon.code}`}><Edit3 size={17} /></button>
+                      <button className="rounded-lg border border-red-200 p-2 text-red-600" onClick={() => deleteCoupon(coupon)} aria-label={`Delete coupon ${coupon.code}`} title={`Delete coupon ${coupon.code}`}><Trash2 size={17} /></button>
                     </div>
                   </td>
                 </tr>

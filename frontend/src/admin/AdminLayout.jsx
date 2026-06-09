@@ -60,7 +60,12 @@ const AdminLayout = ({ children }) => {
   return (
     <div className="min-h-screen bg-slate-50">
       <header className="sticky top-0 z-30 flex h-16 items-center justify-between border-b border-slate-200 bg-white px-4 lg:hidden">
-        <button className="rounded-lg border border-slate-200 p-2" onClick={() => setOpen(true)}>
+        <button
+          className="rounded-lg border border-slate-200 p-2"
+          onClick={() => setOpen(true)}
+          aria-label="Menu"
+          title="Menu"
+        >
           <Menu />
         </button>
         <span className="font-black">FoodExpress Admin</span>
@@ -70,10 +75,20 @@ const AdminLayout = ({ children }) => {
         <div className="fixed inset-y-0 left-0 z-40 hidden lg:block">{sidebar}</div>
         {open && (
           <div className="fixed inset-0 z-50 lg:hidden">
-            <button className="absolute inset-0 bg-slate-900/40" onClick={() => setOpen(false)} aria-label="Close menu" />
+            <button
+              className="absolute inset-0 bg-slate-900/40"
+              onClick={() => setOpen(false)}
+              aria-label="Close menu"
+              title="Close menu"
+            />
             <div className="relative h-full">
               {sidebar}
-              <button className="absolute right-4 top-4 rounded-lg border border-slate-200 bg-white p-2" onClick={() => setOpen(false)}>
+              <button
+                className="absolute right-4 top-4 rounded-lg border border-slate-200 bg-white p-2"
+                onClick={() => setOpen(false)}
+                aria-label="Close menu"
+                title="Close menu"
+              >
                 <X />
               </button>
             </div>

@@ -87,7 +87,12 @@ const Navbar = () => {
         <div className="hidden items-center gap-2 md:flex">{links}</div>
 
         <div className="hidden items-center gap-3 md:flex">
-          <Link to="/cart" className="relative rounded-lg border border-slate-200 p-2 hover:bg-slate-50">
+          <Link
+            to="/cart"
+            className="relative rounded-lg border border-slate-200 p-2 hover:bg-slate-50"
+            aria-label="Cart"
+            title="Cart"
+          >
             <ShoppingCart size={21} />
             {count > 0 && (
               <span className="absolute -right-2 -top-2 grid h-5 min-w-5 place-items-center rounded-full bg-brand-500 px-1 text-xs font-bold text-white">
@@ -96,7 +101,12 @@ const Navbar = () => {
             )}
           </Link>
           {isAuthenticated && user?.role !== "admin" && (
-            <Link to="/notifications" className="relative rounded-lg border border-slate-200 p-2 hover:bg-slate-50" title="Notifications">
+            <Link
+              to="/notifications"
+              className="relative rounded-lg border border-slate-200 p-2 hover:bg-slate-50"
+              aria-label="Notifications"
+              title="Notifications"
+            >
               <Bell size={21} />
               {unreadCount > 0 && (
                 <span className="absolute -right-2 -top-2 grid h-5 min-w-5 place-items-center rounded-full bg-red-500 px-1 text-xs font-bold text-white">
@@ -126,7 +136,12 @@ const Navbar = () => {
           )}
         </div>
 
-        <button className="rounded-lg border border-slate-200 p-2 md:hidden" onClick={() => setOpen(!open)}>
+        <button
+          className="rounded-lg border border-slate-200 p-2 md:hidden"
+          onClick={() => setOpen(!open)}
+          aria-label={open ? "Close menu" : "Menu"}
+          title={open ? "Close menu" : "Menu"}
+        >
           {open ? <X /> : <Menu />}
         </button>
       </nav>

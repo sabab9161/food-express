@@ -183,8 +183,8 @@ const ManageRestaurants = () => {
               <div className="mt-5 flex flex-wrap justify-end gap-2">
                 <button className="rounded-lg border border-emerald-200 px-3 py-2 text-xs font-black text-emerald-700" onClick={() => updateRestaurantFlags(restaurant, { isApproved: true, isBlocked: false })}>Approve</button>
                 <button className="rounded-lg border border-red-200 px-3 py-2 text-xs font-black text-red-700" onClick={() => updateRestaurantFlags(restaurant, { isBlocked: !restaurant.isBlocked })}>{restaurant.isBlocked ? "Unblock" : "Block"}</button>
-                <button className="rounded-lg border border-slate-200 p-2" onClick={() => editRestaurant(restaurant)}><Edit3 size={17} /></button>
-                <button className="rounded-lg border border-red-200 p-2 text-red-600" onClick={() => deleteRestaurant(restaurant._id)}><Trash2 size={17} /></button>
+                <button className="rounded-lg border border-slate-200 p-2" onClick={() => editRestaurant(restaurant)} aria-label={`Edit ${restaurant.name}`} title={`Edit ${restaurant.name}`}><Edit3 size={17} /></button>
+                <button className="rounded-lg border border-red-200 p-2 text-red-600" onClick={() => deleteRestaurant(restaurant._id)} aria-label={`Delete ${restaurant.name}`} title={`Delete ${restaurant.name}`}><Trash2 size={17} /></button>
               </div>
             </div>
           </article>

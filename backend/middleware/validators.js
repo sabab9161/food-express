@@ -1,7 +1,6 @@
 import { body, param, validationResult } from "express-validator";
 
-const strongPasswordMessage =
-  "Password must be at least 8 characters and include uppercase, lowercase, number, and special character.";
+const strongPasswordMessage = "Password is weak";
 const strongPasswordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&.#_-])[A-Za-z\d@$!%*?&.#_-]{8,}$/;
 const phoneRegex = /^[6-9]\d{9}$/;
 const upiRegex = /^[a-zA-Z0-9.\-_]{2,256}@[a-zA-Z]{2,64}$/;
@@ -10,7 +9,7 @@ const allowedImageTypes = ["image/jpeg", "image/jpg", "image/png", "image/webp"]
 export const validate = (req, res, next) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
-    return res.status(400).json({ message: errors.array()[0].msg, errors: errors.array() });
+    return res.status(400).json({ message: errors.array()[0].msg, errors: errors.array(), body: req.body });
   }
   next();
 };
@@ -23,8 +22,8 @@ export const validateObjectId = (field = "id") => [
 export const signupValidators = [
   body("name").trim().notEmpty().withMessage("Name is required").isLength({ max: 80 }).withMessage("Name is too long"),
   body("email").isEmail().normalizeEmail().withMessage("Valid email is required"),
-  body("password").matches(strongPasswordRegex).withMessage(strongPasswordMessage),
-  body("confirmPassword").custom((value, { req }) => value === req.body.password).withMessage("Passwords do not match"),
+  body("password").trim().matches(strongPasswordRegex).withMessage(strongPasswordMessage),
+  body("confirmPassword").trim().notEmpty().withMessage("All fields are required"),
   body("phone").matches(phoneRegex).withMessage("Enter valid 10 digit Indian mobile number"),
   body("role").optional().isIn(["user", "admin"]).withMessage("Invalid role"),
   validate
@@ -53,7 +52,6 @@ export const resetPasswordValidators = [
   body("email").isEmail().normalizeEmail().withMessage("Valid email is required"),
   body("otp").isLength({ min: 6, max: 6 }).isNumeric().withMessage("Valid OTP is required"),
   body("newPassword").matches(strongPasswordRegex).withMessage(strongPasswordMessage),
-  body("confirmPassword").custom((value, { req }) => value === req.body.newPassword).withMessage("Passwords do not match"),
   validate
 ];
 

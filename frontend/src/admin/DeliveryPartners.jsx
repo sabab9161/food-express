@@ -155,8 +155,8 @@ const DeliveryPartners = () => {
                   <td className="p-4">
                     <div className="flex flex-wrap gap-2">
                       <button className="rounded-lg border border-slate-200 px-3 py-2 text-xs font-black" onClick={() => toast("Assign order flow coming soon")}>Assign order</button>
-                      <button className="rounded-lg border border-slate-200 p-2" onClick={() => editPartner(partner)}><Edit3 size={17} /></button>
-                      <button className="rounded-lg border border-red-200 p-2 text-red-600" onClick={() => deletePartner(partner)}><Trash2 size={17} /></button>
+                      <button className="rounded-lg border border-slate-200 p-2" onClick={() => editPartner(partner)} aria-label={`Edit ${partner.name}`} title={`Edit ${partner.name}`}><Edit3 size={17} /></button>
+                      <button className="rounded-lg border border-red-200 p-2 text-red-600" onClick={() => deletePartner(partner)} aria-label={`Delete ${partner.name}`} title={`Delete ${partner.name}`}><Trash2 size={17} /></button>
                     </div>
                   </td>
                 </tr>

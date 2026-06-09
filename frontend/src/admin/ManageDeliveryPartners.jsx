@@ -89,7 +89,7 @@ const ManageDeliveryPartners = () => {
                 <td className="p-4">{partner.licenseNumber}</td>
                 <td className="p-4">{partner.status}</td>
                 <td className="p-4 font-black">{formatPrice(partner.earnings)}</td>
-                <td className="p-4"><div className="flex justify-end gap-2"><button className="rounded-lg border border-slate-200 p-2" onClick={() => edit(partner)}><Edit3 size={17} /></button><button className="rounded-lg border border-red-200 p-2 text-red-600" onClick={() => remove(partner._id)}><Trash2 size={17} /></button></div></td>
+                <td className="p-4"><div className="flex justify-end gap-2"><button className="rounded-lg border border-slate-200 p-2" onClick={() => edit(partner)} aria-label={`Edit ${partner.name}`} title={`Edit ${partner.name}`}><Edit3 size={17} /></button><button className="rounded-lg border border-red-200 p-2 text-red-600" onClick={() => remove(partner._id)} aria-label={`Delete ${partner.name}`} title={`Delete ${partner.name}`}><Trash2 size={17} /></button></div></td>
               </tr>
             ))}
           </tbody>

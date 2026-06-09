@@ -40,7 +40,7 @@ const ManageNotifications = () => {
           <article key={notification._id} className="rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
             <div className="flex items-start justify-between gap-4">
               <div><p className="font-black">{notification.title}</p><p className="mt-1 text-sm text-slate-600">{notification.message}</p><p className="mt-2 text-xs font-bold text-brand-600">{notification.type} / {notification.targetAudience}</p></div>
-              <button className="rounded-lg border border-red-200 p-2 text-red-600" onClick={() => remove(notification._id)}><Trash2 size={17} /></button>
+              <button className="rounded-lg border border-red-200 p-2 text-red-600" onClick={() => remove(notification._id)} aria-label={`Delete notification ${notification.title}`} title={`Delete notification ${notification.title}`}><Trash2 size={17} /></button>
             </div>
           </article>
         ))}

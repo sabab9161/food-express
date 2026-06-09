@@ -176,8 +176,8 @@ const ManageFoods = () => {
                   <td className="p-4">{food.isAvailable && food.stock > 0 ? "Available" : "Out of stock"}</td>
                   <td className="p-4">
                     <div className="flex justify-end gap-2">
-                      <button className="rounded-lg border border-slate-200 p-2" onClick={() => editFood(food)}><Edit3 size={17} /></button>
-                      <button className="rounded-lg border border-red-200 p-2 text-red-600" onClick={() => deleteFood(food._id)}><Trash2 size={17} /></button>
+                      <button className="rounded-lg border border-slate-200 p-2" onClick={() => editFood(food)} aria-label={`Edit ${food.name}`} title={`Edit ${food.name}`}><Edit3 size={17} /></button>
+                      <button className="rounded-lg border border-red-200 p-2 text-red-600" onClick={() => deleteFood(food._id)} aria-label={`Delete ${food.name}`} title={`Delete ${food.name}`}><Trash2 size={17} /></button>
                     </div>
                   </td>
                 </tr>

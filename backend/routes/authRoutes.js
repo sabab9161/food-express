@@ -6,17 +6,12 @@ import {
   login,
   register,
   registerAdmin,
-  resetPassword,
-  sendLoginOtp,
-  sendSignupOtp,
-  verifyLoginOtp,
-  verifySignupOtp
+  resetPassword
 } from "../controllers/authController.js";
 import { protect } from "../middleware/authMiddleware.js";
 import {
   forgotPasswordValidators,
   loginValidators,
-  otpVerifyValidators,
   resetPasswordValidators,
   signupValidators
 } from "../middleware/validators.js";
@@ -32,7 +27,7 @@ const authLimiter = rateLimit({
   message: { message: "Too many authentication requests, please try again later" }
 });
 
-const otpLimiter = rateLimit({
+const passwordResetLimiter = rateLimit({
   windowMs: 10 * 60 * 1000,
   max: isProduction ? 5 : 20,
   skipSuccessfulRequests: true,
@@ -41,11 +36,7 @@ const otpLimiter = rateLimit({
   message: { message: "Too many OTP requests. Please wait and try again." }
 });
 
-router.post("/send-signup-otp", authLimiter, otpLimiter, signupValidators, sendSignupOtp);
-router.post("/verify-signup-otp", authLimiter, signupValidators, otpVerifyValidators, verifySignupOtp);
-router.post("/send-login-otp", authLimiter, otpLimiter, loginValidators, sendLoginOtp);
-router.post("/verify-login-otp", authLimiter, otpVerifyValidators, verifyLoginOtp);
-router.post("/forgot-password", authLimiter, otpLimiter, forgotPasswordValidators, forgotPassword);
+router.post("/forgot-password", authLimiter, passwordResetLimiter, forgotPasswordValidators, forgotPassword);
 router.post("/reset-password", authLimiter, resetPasswordValidators, resetPassword);
 router.post("/register", authLimiter, signupValidators, register);
 router.post("/admin-register", authLimiter, signupValidators, registerAdmin);

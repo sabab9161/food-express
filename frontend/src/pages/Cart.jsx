@@ -31,12 +31,12 @@ const Cart = () => {
                 <p className="text-sm text-slate-600">{formatPrice(item.price)}</p>
               </div>
               <div className="flex items-center rounded-lg border border-slate-200">
-                <button className="p-2" onClick={() => updateQuantity(item._id, item.quantity - 1)}><Minus size={16} /></button>
+                <button className="p-2" onClick={() => updateQuantity(item._id, item.quantity - 1)} aria-label={`Decrease ${item.name} quantity`} title={`Decrease ${item.name} quantity`}><Minus size={16} /></button>
                 <span className="min-w-10 text-center font-bold">{item.quantity}</span>
-                <button className="p-2" onClick={() => updateQuantity(item._id, item.quantity + 1)}><Plus size={16} /></button>
+                <button className="p-2" onClick={() => updateQuantity(item._id, item.quantity + 1)} aria-label={`Increase ${item.name} quantity`} title={`Increase ${item.name} quantity`}><Plus size={16} /></button>
               </div>
               <p className="font-black">{formatPrice(item.price * item.quantity)}</p>
-              <button className="rounded-lg p-2 text-red-600 hover:bg-red-50" onClick={() => removeFromCart(item._id)}>
+              <button className="rounded-lg p-2 text-red-600 hover:bg-red-50" onClick={() => removeFromCart(item._id)} aria-label={`Remove ${item.name}`} title={`Remove ${item.name}`}>
                 <Trash2 size={18} />
               </button>
             </div>

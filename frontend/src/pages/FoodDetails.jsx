@@ -38,9 +38,9 @@ const FoodDetails = () => {
         </div>
         <div className="mt-8 flex flex-wrap items-center gap-4">
           <div className="flex items-center rounded-lg border border-slate-200 bg-white">
-            <button className="p-3" onClick={() => setQuantity(Math.max(1, quantity - 1))}><Minus size={18} /></button>
+            <button className="p-3" onClick={() => setQuantity(Math.max(1, quantity - 1))} aria-label="Decrease quantity" title="Decrease quantity"><Minus size={18} /></button>
             <span className="min-w-12 text-center font-black">{quantity}</span>
-            <button className="p-3" onClick={() => setQuantity(quantity + 1)}><Plus size={18} /></button>
+            <button className="p-3" onClick={() => setQuantity(quantity + 1)} aria-label="Increase quantity" title="Increase quantity"><Plus size={18} /></button>
           </div>
           <button className="btn-primary" onClick={() => addToCart(food, quantity)}>
             <ShoppingCart size={19} /> Add to cart
